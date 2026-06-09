@@ -12,21 +12,20 @@ type Column = {
 };
 
 const columns: Column[] = [
-  { key: "created_at", label: "Created At", widthClass: "min-w-[120px] w-[120px] max-w-[120px]" },
-  { key: "updated_at", label: "Updated At", widthClass: "min-w-[120px] w-[120px] max-w-[120px]" },
+  { key: "company_name", label: "Company", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
+  { key: "person_name", label: "Person", widthClass: "min-w-[160px] w-[160px] max-w-[160px]" },
+  { key: "role", label: "Role", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
+  { key: "linkedin_message_status", label: "LinkedIn Status", widthClass: "min-w-[150px] w-[150px] max-w-[150px]" },
+  { key: "linkedin_connected", label: "LinkedIn Connected", widthClass: "min-w-[170px] w-[170px] max-w-[170px]" },
   { key: "event_day", label: "Event Day", widthClass: "min-w-[110px] w-[110px] max-w-[110px]" },
   { key: "time_window", label: "Time Window", widthClass: "min-w-[130px] w-[130px] max-w-[130px]" },
   { key: "meeting_time", label: "Meeting Time", widthClass: "min-w-[130px] w-[130px] max-w-[130px]" },
   { key: "hall", label: "Hall", widthClass: "min-w-[120px] w-[120px] max-w-[120px]" },
   { key: "stand_number", label: "Stand Number", widthClass: "min-w-[150px] w-[150px] max-w-[150px]" },
-  { key: "shared_stand", label: "Shared Stand / Together With", widthClass: "min-w-[320px] w-[320px] max-w-[320px]" },
   { key: "country", label: "Country", widthClass: "min-w-[130px] w-[130px] max-w-[130px]" },
-  { key: "company_name", label: "Company", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
-  { key: "person_name", label: "Person", widthClass: "min-w-[160px] w-[160px] max-w-[160px]" },
-  { key: "role", label: "Role", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
-  { key: "linkedin_connected", label: "LinkedIn Connected", widthClass: "min-w-[170px] w-[170px] max-w-[170px]" },
-  { key: "linkedin_message_status", label: "LinkedIn Status", widthClass: "min-w-[150px] w-[150px] max-w-[150px]" },
   { key: "meeting_outcome", label: "Meeting Outcome", widthClass: "min-w-[190px] w-[190px] max-w-[190px]" },
+  { key: "next_step", label: "Next Step", widthClass: "min-w-[260px] w-[260px] max-w-[260px]" },
+  { key: "shared_stand", label: "Shared Stand / Together With", widthClass: "min-w-[320px] w-[320px] max-w-[320px]" },
   { key: "notes", label: "Notes", widthClass: "min-w-[440px] w-[440px] max-w-[440px]" },
   { key: "linkedin_message_sent_to", label: "LinkedIn Sent To", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
   { key: "linkedin_reply_notes", label: "LinkedIn Notes", widthClass: "min-w-[320px] w-[320px] max-w-[320px]" },
@@ -37,7 +36,8 @@ const columns: Column[] = [
   { key: "pain_confirmed", label: "Pain Confirmed", widthClass: "min-w-[160px] w-[160px] max-w-[160px]" },
   { key: "pain_category", label: "Pain Category", widthClass: "min-w-[160px] w-[160px] max-w-[160px]" },
   { key: "pilot_possible", label: "Pilot Possible", widthClass: "min-w-[150px] w-[150px] max-w-[150px]" },
-  { key: "next_step", label: "Next Step", widthClass: "min-w-[260px] w-[260px] max-w-[260px]" },
+  { key: "created_at", label: "Created At", widthClass: "min-w-[120px] w-[120px] max-w-[120px]" },
+  { key: "updated_at", label: "Updated At", widthClass: "min-w-[120px] w-[120px] max-w-[120px]" },
   { key: "excel_row_number", label: "Excel Row" },
   { key: "excel_company", label: "Excel Company", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
   { key: "excel_hq", label: "Excel HQ" },
@@ -286,7 +286,7 @@ export function RecordsTable() {
 
       <section className="mx-auto max-w-7xl px-4 py-5">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="grid gap-3 md:grid-cols-[1fr_260px_auto]">
+          <div className="grid gap-3 lg:grid-cols-[minmax(320px,1fr)_minmax(220px,280px)_auto]">
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -315,7 +315,7 @@ export function RecordsTable() {
             </button>
           </div>
 
-          <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-[150px_170px_170px_140px_170px_170px_160px_220px]">
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8">
             <select
               value={eventDay}
               onChange={(event) => setEventDay(event.target.value)}
