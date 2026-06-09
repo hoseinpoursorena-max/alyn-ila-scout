@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 * {
@@ -13,8 +13,8 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: #080b12;
-  color: #eef4f8;
+  background: #f7f9fb;
+  color: #0f172a;
 }
 
 input,
@@ -30,8 +30,5 @@ button {
 }
 
 .bg-field-console {
-  background:
-    radial-gradient(circle at 16% 0%, rgba(100, 210, 180, 0.16), transparent 28rem),
-    radial-gradient(circle at 88% 10%, rgba(59, 130, 246, 0.12), transparent 24rem),
-    linear-gradient(180deg, #08111d 0%, #080b12 44%, #070910 100%);
+  background: #f7f9fb;
 }

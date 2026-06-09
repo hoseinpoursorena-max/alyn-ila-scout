@@ -29,6 +29,27 @@ const roleOptions = [
 const fields = {
   event_day: ["Wed", "Thu", "Fri"],
   time_window: ["Morning", "Noon", "Afternoon"],
+  meeting_time: [
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+    "12:00",
+    "12:30",
+    "13:00",
+    "13:30",
+    "14:00",
+    "14:30",
+    "15:00",
+    "15:30",
+    "16:00",
+    "16:30",
+    "17:00",
+    "17:30",
+    "18:00",
+    "18:30",
+    "19:00"
+  ],
   company_relevance: ["High", "Medium", "Low"],
   person_decision_proximity: ["Decision maker", "Influencer", "Referral only", "Not relevant"],
   pain_confirmed: ["Strongly", "Somewhat", "Not really"],
@@ -55,6 +76,16 @@ const fields = {
     "Not ICP / Low Priority",
     "Partner / Media / Network Contact",
     "Post-Event Timing / Later Follow-up"
+  ],
+  linkedin_message_status: [
+    "Not contacted",
+    "Message sent",
+    "Seen / no reply",
+    "Replied",
+    "Interested to talk",
+    "Meeting agreed",
+    "Not relevant",
+    "Follow up later"
   ]
 };
 
@@ -66,6 +97,12 @@ const initialForm: ConversationInput = {
   email: "",
   event_day: "",
   time_window: "",
+  meeting_time: "",
+  country: "",
+  linkedin_connected: false,
+  linkedin_message_sent_to: "",
+  linkedin_message_status: "Not contacted",
+  linkedin_reply_notes: "",
   company_relevance: "",
   person_decision_proximity: "",
   pain_confirmed: "",
@@ -87,6 +124,12 @@ function formFromRecord(record?: ConversationInput | null): ConversationInput {
     email: record?.email ?? "",
     event_day: record?.event_day ?? "",
     time_window: record?.time_window ?? "",
+    meeting_time: record?.meeting_time ?? "",
+    country: record?.country ?? "",
+    linkedin_connected: Boolean(record?.linkedin_connected),
+    linkedin_message_sent_to: record?.linkedin_message_sent_to ?? "",
+    linkedin_message_status: record?.linkedin_message_status ?? "Not contacted",
+    linkedin_reply_notes: record?.linkedin_reply_notes ?? "",
     company_relevance: record?.company_relevance ?? "",
     person_decision_proximity: record?.person_decision_proximity ?? "",
     pain_confirmed: record?.pain_confirmed ?? "",
@@ -101,7 +144,7 @@ function formFromRecord(record?: ConversationInput | null): ConversationInput {
 }
 
 function inputClass() {
-  return "mt-2 min-h-[52px] w-full rounded-xl border border-white/10 bg-[#0b111d]/90 px-4 py-3 text-base text-white shadow-inner shadow-black/20 outline-none transition focus:border-signal focus:ring-2 focus:ring-signal/20";
+  return "mt-2 min-h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-950 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-signal focus:ring-2 focus:ring-signal/20";
 }
 
 function TextField({
@@ -121,8 +164,8 @@ function TextField({
 }) {
   return (
     <label className="block">
-      <span className="text-[0.95rem] font-semibold text-slate-100">{label}</span>
-      {helper ? <span className="mt-1 block text-sm leading-5 text-slate-400">{helper}</span> : null}
+      <span className="text-[0.95rem] font-semibold text-slate-900">{label}</span>
+      {helper ? <span className="mt-1 block text-sm leading-5 text-slate-500">{helper}</span> : null}
       <input type={type} value={value} onChange={(event) => onChange(name, event.target.value)} className={inputClass()} />
     </label>
   );
@@ -147,8 +190,8 @@ function SelectField({
 }) {
   return (
     <label className="block">
-      <span className="text-[0.95rem] font-semibold text-slate-100">{label}</span>
-      {helper ? <span className="mt-1 block text-sm leading-5 text-slate-400">{helper}</span> : null}
+      <span className="text-[0.95rem] font-semibold text-slate-900">{label}</span>
+      {helper ? <span className="mt-1 block text-sm leading-5 text-slate-500">{helper}</span> : null}
       <select value={value} onChange={(event) => onChange(name, event.target.value)} className={inputClass()}>
         <option value="">{placeholder}</option>
         {options.map((option) => (
@@ -157,6 +200,35 @@ function SelectField({
           </option>
         ))}
       </select>
+    </label>
+  );
+}
+
+function TextAreaField({
+  label,
+  helper,
+  name,
+  value,
+  rows = 3,
+  onChange
+}: {
+  label: string;
+  helper?: string;
+  name: keyof ConversationInput;
+  value: string;
+  rows?: number;
+  onChange: (name: keyof ConversationInput, value: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="text-[0.95rem] font-semibold text-slate-900">{label}</span>
+      {helper ? <span className="mt-1 block text-sm leading-5 text-slate-500">{helper}</span> : null}
+      <textarea
+        value={value}
+        onChange={(event) => onChange(name, event.target.value)}
+        rows={rows}
+        className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base leading-6 text-slate-950 shadow-sm outline-none transition focus:border-signal focus:ring-2 focus:ring-signal/20"
+      />
     </label>
   );
 }
@@ -171,10 +243,10 @@ function FormSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#101827]/80 p-4 shadow-2xl shadow-black/20 backdrop-blur sm:p-5">
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="mb-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-signal/80">{eyebrow}</p>
-        <h2 className="mt-1 text-lg font-semibold text-white">{title}</h2>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">{eyebrow}</p>
+        <h2 className="mt-1 text-lg font-semibold text-slate-950">{title}</h2>
       </div>
       <div className="grid gap-5">{children}</div>
     </section>
@@ -182,10 +254,10 @@ function FormSection({
 }
 
 function statusClasses(status?: string | null) {
-  if (status === "Hot Lead") return "border-amber-400/40 bg-amber-500/[0.12] text-amber-100";
-  if (status === "Warm Lead") return "border-signal/40 bg-signal/[0.12] text-teal-100";
-  if (status === "Nurture") return "border-sky-400/35 bg-sky-500/[0.12] text-sky-100";
-  return "border-slate-500/35 bg-slate-700/25 text-slate-100";
+  if (status === "Hot Lead") return "border-amber-300 bg-amber-50 text-amber-900";
+  if (status === "Warm Lead") return "border-emerald-300 bg-emerald-50 text-emerald-900";
+  if (status === "Nurture") return "border-sky-300 bg-sky-50 text-sky-900";
+  return "border-slate-200 bg-slate-50 text-slate-700";
 }
 
 export function ConversationForm({
@@ -264,17 +336,17 @@ export function ConversationForm({
     return (
       <main className="min-h-screen bg-field-console px-4 py-6">
         <section className="mx-auto w-full max-w-3xl">
-          <div className="rounded-3xl border border-white/10 bg-[#101827]/85 p-5 shadow-2xl shadow-black/30 backdrop-blur sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-signal">Conversation Saved</p>
-            <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">Lead intelligence ready</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Conversation Saved</p>
+            <h1 className="mt-2 text-2xl font-semibold text-slate-950 sm:text-3xl">Lead intelligence ready</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
               Score, status, next action, and follow-up message were generated from the captured conversation.
             </p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-[0.8fr_1.2fr]">
-              <div className="rounded-2xl border border-white/10 bg-[#0b111d] p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Lead Score</p>
-                <p className="mt-2 text-5xl font-bold text-white">{savedRecord.lead_score}</p>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lead Score</p>
+                <p className="mt-2 text-5xl font-bold text-slate-950">{savedRecord.lead_score}</p>
                 <p className="mt-1 text-sm text-slate-500">Capped at 100</p>
               </div>
               <div className={`rounded-2xl border p-5 ${statusClasses(savedRecord.lead_status)}`}>
@@ -284,9 +356,9 @@ export function ConversationForm({
               </div>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-white/10 bg-[#0b111d]/90 p-4 sm:p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Generated Follow-up Message</p>
-              <pre className="mt-4 max-h-[460px] overflow-auto whitespace-pre-wrap rounded-xl border border-white/[0.08] bg-black/20 p-4 text-[0.95rem] leading-7 text-slate-100">
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Generated Follow-up Message</p>
+              <pre className="mt-4 max-h-[460px] overflow-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-4 text-[0.95rem] leading-7 text-slate-800">
                 {savedRecord.generated_follow_up}
               </pre>
             </div>
@@ -295,10 +367,10 @@ export function ConversationForm({
               <button type="button" onClick={copyFollowUp} className="h-[52px] rounded-xl bg-signal px-4 font-bold text-ink shadow-lg shadow-signal/10">
                 {copied ? "Copied" : "Copy Follow-up"}
               </button>
-              <button type="button" onClick={startNew} className="h-[52px] rounded-xl border border-white/10 bg-white/5 px-4 font-semibold text-white">
+              <button type="button" onClick={startNew} className="h-[52px] rounded-xl border border-slate-200 bg-white px-4 font-semibold text-slate-900">
                 New Conversation
               </button>
-              <Link href="/records" className="flex h-[52px] items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 font-semibold text-white">
+              <Link href="/records" className="flex h-[52px] items-center justify-center rounded-xl border border-slate-200 bg-white px-4 font-semibold text-slate-900">
                 View Records
               </Link>
             </div>
@@ -311,14 +383,14 @@ export function ConversationForm({
   return (
     <main className={embedded ? "bg-field-console" : "min-h-screen bg-field-console pb-28"}>
       {!embedded ? (
-      <header className="sticky top-0 z-10 border-b border-white/10 bg-[#080b12]/88 px-4 py-4 backdrop-blur-xl">
+      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 px-4 py-4 backdrop-blur-xl">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-signal">ALYN Internal</p>
-            <h1 className="mt-1 text-2xl font-bold text-white sm:text-3xl">ILA Scout</h1>
-            <p className="mt-1 text-sm leading-5 text-slate-400">Capture ILA conversations. Score leads. Generate follow-ups.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">ALYN Internal</p>
+            <h1 className="mt-1 text-2xl font-bold text-slate-950 sm:text-3xl">ILA Scout</h1>
+            <p className="mt-1 text-sm leading-5 text-slate-600">Capture ILA conversations. Score leads. Generate follow-ups.</p>
           </div>
-          <Link href="/records" className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-slate-100 shadow-lg shadow-black/20">
+          <Link href="/records" className="shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm">
             Records
           </Link>
         </div>
@@ -334,6 +406,39 @@ export function ConversationForm({
             <TextField label="Mobile" name="mobile" value={form.mobile ?? ""} onChange={updateField} />
           </div>
           <TextField label="Email" name="email" type="email" value={form.email ?? ""} onChange={updateField} />
+          <TextField label="Country" name="country" value={form.country ?? ""} onChange={updateField} />
+          <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-[0.95rem] leading-6 text-slate-800">
+            <input
+              type="checkbox"
+              checked={Boolean(form.linkedin_connected)}
+              onChange={(event) => setForm((current) => ({ ...current, linkedin_connected: event.target.checked }))}
+              className="mt-1 h-5 w-5 shrink-0 accent-signal"
+            />
+            <span>LinkedIn connected already?</span>
+          </label>
+          <TextAreaField
+            label="LinkedIn message sent to"
+            helper="Name or names of people contacted from this company."
+            name="linkedin_message_sent_to"
+            value={form.linkedin_message_sent_to ?? ""}
+            rows={3}
+            onChange={updateField}
+          />
+          <SelectField
+            label="LinkedIn message status"
+            name="linkedin_message_status"
+            value={form.linkedin_message_status ?? "Not contacted"}
+            options={fields.linkedin_message_status}
+            placeholder="Not contacted"
+            onChange={updateField}
+          />
+          <TextAreaField
+            label="LinkedIn reply / notes"
+            name="linkedin_reply_notes"
+            value={form.linkedin_reply_notes ?? ""}
+            rows={3}
+            onChange={updateField}
+          />
           <div className="grid gap-5 sm:grid-cols-2">
             <SelectField
               label="Event Day"
@@ -352,6 +457,14 @@ export function ConversationForm({
               onChange={updateField}
             />
           </div>
+          <SelectField
+            label="Meeting Time"
+            name="meeting_time"
+            value={form.meeting_time ?? ""}
+            options={fields.meeting_time}
+            placeholder="Not set"
+            onChange={updateField}
+          />
         </FormSection>
 
         <FormSection eyebrow="02" title="Relevance & Decision Fit">
@@ -417,15 +530,15 @@ export function ConversationForm({
             onChange={updateField}
           />
           <label className="block">
-            <span className="text-[0.95rem] font-semibold text-slate-100">Notes</span>
+            <span className="text-[0.95rem] font-semibold text-slate-900">Notes</span>
             <textarea
               value={form.notes ?? ""}
               onChange={(event) => updateField("notes", event.target.value)}
               rows={5}
-              className="mt-2 w-full rounded-xl border border-white/10 bg-[#0b111d]/90 px-4 py-3 text-base leading-6 text-white shadow-inner shadow-black/20 outline-none transition focus:border-signal focus:ring-2 focus:ring-signal/20"
+              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base leading-6 text-slate-950 shadow-sm outline-none transition focus:border-signal focus:ring-2 focus:ring-signal/20"
             />
           </label>
-          <label className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-[0.95rem] leading-6 text-slate-100">
+          <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-[0.95rem] leading-6 text-slate-800">
             <input
               type="checkbox"
               checked={Boolean(form.follow_up_consent)}
@@ -436,11 +549,11 @@ export function ConversationForm({
           </label>
         </FormSection>
 
-        {error ? <p className="rounded-xl border border-red-500/40 bg-red-950/50 p-3 text-sm text-red-200">{error}</p> : null}
+        {error ? <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
 
-        <div className={embedded ? "rounded-2xl border border-white/10 bg-[#101827]/80 p-4" : "fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-[#080b12]/92 px-4 py-3 backdrop-blur-xl sm:static sm:rounded-2xl sm:border sm:bg-[#101827]/80 sm:p-4"}>
+        <div className={embedded ? "rounded-2xl border border-slate-200 bg-white p-4" : "fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-xl sm:static sm:rounded-2xl sm:border sm:bg-white sm:p-4"}>
           <div className="mx-auto max-w-3xl">
-            <p className="mb-2 text-center text-sm text-slate-400 sm:text-left">All fields are optional. Save whatever you captured.</p>
+            <p className="mb-2 text-center text-sm text-slate-600 sm:text-left">All fields are optional. Save whatever you captured.</p>
             <div className={embedded ? "grid gap-3 sm:grid-cols-[1fr_auto]" : ""}>
               <button
                 type="submit"
@@ -453,7 +566,7 @@ export function ConversationForm({
                 <button
                   type="button"
                   onClick={onCancel}
-                  className="h-14 rounded-xl border border-white/10 bg-white/5 px-5 text-base font-semibold text-white"
+                  className="h-14 rounded-xl border border-slate-200 bg-white px-5 text-base font-semibold text-slate-900"
                 >
                   Cancel
                 </button>

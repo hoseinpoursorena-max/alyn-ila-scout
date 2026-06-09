@@ -11,6 +11,12 @@ create table if not exists public.ila_conversations (
   email text null,
   event_day text null,
   time_window text null,
+  meeting_time text null,
+  country text null,
+  linkedin_connected boolean default false,
+  linkedin_message_sent_to text null,
+  linkedin_message_status text default 'Not contacted',
+  linkedin_reply_notes text null,
   company_relevance text null,
   person_decision_proximity text null,
   pain_confirmed text null,
@@ -30,4 +36,10 @@ create table if not exists public.ila_conversations (
 alter table public.ila_conversations
   add column if not exists updated_at timestamptz null,
   add column if not exists event_day text null,
-  add column if not exists time_window text null;
+  add column if not exists time_window text null,
+  add column if not exists meeting_time text null,
+  add column if not exists country text null,
+  add column if not exists linkedin_connected boolean default false,
+  add column if not exists linkedin_message_sent_to text null,
+  add column if not exists linkedin_message_status text default 'Not contacted',
+  add column if not exists linkedin_reply_notes text null;

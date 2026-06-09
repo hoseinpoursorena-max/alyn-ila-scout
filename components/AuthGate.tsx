@@ -50,12 +50,12 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     <main className="flex min-h-screen items-center justify-center bg-field-console px-4 py-10">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-3xl border border-white/10 bg-[#101827]/85 p-6 shadow-2xl shadow-black/40 backdrop-blur"
+        className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
       >
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-signal">ALYN Internal</p>
-        <h1 className="mt-2 text-3xl font-bold text-white">ILA Scout</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-400">Capture ILA conversations. Score leads. Generate follow-ups.</p>
-        <label className="mt-6 block text-sm font-semibold text-slate-200" htmlFor="password">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">ALYN Internal</p>
+        <h1 className="mt-2 text-3xl font-bold text-slate-950">ILA Scout</h1>
+        <p className="mt-2 text-sm leading-6 text-slate-600">Capture ILA conversations. Score leads. Generate follow-ups.</p>
+        <label className="mt-6 block text-sm font-semibold text-slate-900" htmlFor="password">
           Password
         </label>
         <input
@@ -63,10 +63,10 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="mt-2 h-[52px] w-full rounded-xl border border-white/10 bg-[#0b111d] px-4 text-base text-white outline-none transition focus:border-signal focus:ring-2 focus:ring-signal/20"
+          className="mt-2 h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-950 shadow-sm outline-none transition focus:border-signal focus:ring-2 focus:ring-signal/20"
           autoFocus
         />
-        {error ? <p className="mt-3 text-sm text-red-300">{error}</p> : null}
+        {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
         <button
           type="submit"
           disabled={isSubmitting}

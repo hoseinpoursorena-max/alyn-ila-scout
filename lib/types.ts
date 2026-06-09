@@ -6,6 +6,12 @@ export type ConversationInput = {
   email?: string | null;
   event_day?: string | null;
   time_window?: string | null;
+  meeting_time?: string | null;
+  country?: string | null;
+  linkedin_connected?: boolean | null;
+  linkedin_message_sent_to?: string | null;
+  linkedin_message_status?: string | null;
+  linkedin_reply_notes?: string | null;
   company_relevance?: string | null;
   person_decision_proximity?: string | null;
   pain_confirmed?: string | null;

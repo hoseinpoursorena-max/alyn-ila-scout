@@ -14,6 +14,12 @@ function normalizePayload(payload: ConversationInput): ConversationInput {
     email: clean(payload.email),
     event_day: clean(payload.event_day),
     time_window: clean(payload.time_window),
+    meeting_time: clean(payload.meeting_time),
+    country: clean(payload.country),
+    linkedin_connected: typeof payload.linkedin_connected === "boolean" ? payload.linkedin_connected : false,
+    linkedin_message_sent_to: clean(payload.linkedin_message_sent_to),
+    linkedin_message_status: clean(payload.linkedin_message_status) ?? "Not contacted",
+    linkedin_reply_notes: clean(payload.linkedin_reply_notes),
     company_relevance: clean(payload.company_relevance),
     person_decision_proximity: clean(payload.person_decision_proximity),
     pain_confirmed: clean(payload.pain_confirmed),
@@ -101,6 +107,33 @@ export async function PATCH(request: Request) {
     }
 
     return NextResponse.json({ record: data });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unexpected error." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { id } = (await request.json()) as { id?: string };
+
+    if (!id) {
+      return NextResponse.json({ error: "Conversation id is required." }, { status: 400 });
+    }
+
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("ila_conversations")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unexpected error." },
