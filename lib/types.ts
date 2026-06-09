@@ -4,6 +4,8 @@ export type ConversationInput = {
   person_name?: string | null;
   mobile?: string | null;
   email?: string | null;
+  event_day?: string | null;
+  time_window?: string | null;
   company_relevance?: string | null;
   person_decision_proximity?: string | null;
   pain_confirmed?: string | null;
@@ -19,6 +21,7 @@ export type ConversationInput = {
 export type ConversationRecord = ConversationInput & {
   id: string;
   created_at: string;
+  updated_at?: string | null;
   lead_score: number | null;
   lead_status: string | null;
   suggested_action: string | null;

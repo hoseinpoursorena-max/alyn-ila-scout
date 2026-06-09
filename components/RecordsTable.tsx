@@ -2,15 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { ConversationForm } from "@/components/ConversationForm";
 import type { ConversationRecord } from "@/lib/types";
 
 const columns: Array<{ key: keyof ConversationRecord; label: string }> = [
   { key: "created_at", label: "Created At" },
+  { key: "updated_at", label: "Updated At" },
   { key: "company_name", label: "Company" },
   { key: "person_name", label: "Person" },
   { key: "role", label: "Role" },
   { key: "email", label: "Email" },
   { key: "mobile", label: "Mobile" },
+  { key: "event_day", label: "Event Day" },
+  { key: "time_window", label: "Time Window" },
   { key: "company_relevance", label: "Company Relevance" },
   { key: "person_decision_proximity", label: "Decision Proximity" },
   { key: "pain_confirmed", label: "Pain Confirmed" },
@@ -37,6 +41,12 @@ function formatDate(value: string | null | undefined) {
   }).format(new Date(value));
 }
 
+function displayValue(record: ConversationRecord, key: keyof ConversationRecord) {
+  if (key === "created_at" || key === "updated_at") return formatDate(record[key]);
+  if (key === "event_day" || key === "time_window") return record[key] || "Not set";
+  return String(record[key] ?? "");
+}
+
 function statusPill(status?: string | null) {
   if (status === "Hot Lead") return "border-amber-400/35 bg-amber-500/15 text-amber-100";
   if (status === "Warm Lead") return "border-signal/35 bg-signal/15 text-teal-100";
@@ -49,6 +59,9 @@ export function RecordsTable() {
   const [search, setSearch] = useState("");
   const [leadStatus, setLeadStatus] = useState("");
   const [meetingOutcome, setMeetingOutcome] = useState("");
+  const [eventDay, setEventDay] = useState("");
+  const [timeWindow, setTimeWindow] = useState("");
+  const [editingRecord, setEditingRecord] = useState<ConversationRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -78,17 +91,21 @@ export function RecordsTable() {
         String(record.generated_follow_up ?? "").toLowerCase().includes(term);
       const matchesStatus = !leadStatus || record.lead_status === leadStatus;
       const matchesOutcome = !meetingOutcome || record.meeting_outcome === meetingOutcome;
-      return matchesSearch && matchesStatus && matchesOutcome;
+      const matchesEventDay = !eventDay || (record.event_day ?? "") === eventDay;
+      const matchesTimeWindow = !timeWindow || (record.time_window ?? "") === timeWindow;
+      return matchesSearch && matchesStatus && matchesOutcome && matchesEventDay && matchesTimeWindow;
     });
-  }, [records, search, leadStatus, meetingOutcome]);
+  }, [records, search, leadStatus, meetingOutcome, eventDay, timeWindow]);
 
   const leadStatuses = Array.from(new Set(records.map((record) => record.lead_status).filter(Boolean)));
   const meetingOutcomes = Array.from(new Set(records.map((record) => record.meeting_outcome).filter(Boolean)));
+  const eventDays = ["Wed", "Thu", "Fri"];
+  const timeWindows = ["Morning", "Noon", "Afternoon"];
 
   function exportCsv() {
     const header = [...columns.map((column) => column.label), "Generated Follow-up"];
     const rows = filteredRecords.map((record) => [
-      ...columns.map(({ key }) => (key === "created_at" ? formatDate(record.created_at) : record[key])),
+      ...columns.map(({ key }) => displayValue(record, key)),
       record.generated_follow_up
     ]);
     const csv = [header, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
@@ -106,6 +123,11 @@ export function RecordsTable() {
   async function copyFollowUp(message?: string | null) {
     if (!message) return;
     await navigator.clipboard.writeText(message);
+  }
+
+  function handleRecordUpdated(updatedRecord: ConversationRecord) {
+    setRecords((current) => current.map((record) => (record.id === updatedRecord.id ? updatedRecord : record)));
+    setEditingRecord(null);
   }
 
   return (
@@ -166,6 +188,33 @@ export function RecordsTable() {
             </button>
           </div>
 
+          <div className="mt-3 grid gap-3 md:grid-cols-[220px_220px]">
+            <select
+              value={eventDay}
+              onChange={(event) => setEventDay(event.target.value)}
+              className="h-[52px] rounded-xl border border-white/10 bg-[#0b111d] px-4 text-base text-white outline-none transition focus:border-signal focus:ring-2 focus:ring-signal/20"
+            >
+              <option value="">All event days</option>
+              {eventDays.map((day) => (
+                <option key={day} value={day}>
+                  {day}
+                </option>
+              ))}
+            </select>
+            <select
+              value={timeWindow}
+              onChange={(event) => setTimeWindow(event.target.value)}
+              className="h-[52px] rounded-xl border border-white/10 bg-[#0b111d] px-4 text-base text-white outline-none transition focus:border-signal focus:ring-2 focus:ring-signal/20"
+            >
+              <option value="">All time windows</option>
+              {timeWindows.map((window) => (
+                <option key={window} value={window}>
+                  {window}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-400">
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{filteredRecords.length} shown</span>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{records.length} total</span>
@@ -180,6 +229,9 @@ export function RecordsTable() {
             <table className="min-w-[1900px] border-collapse text-left text-sm">
               <thead className="sticky top-0 bg-[#151f2d] text-xs uppercase tracking-[0.04em] text-slate-300">
                 <tr>
+                  <th className="border-b border-r border-white/10 px-4 py-4 font-semibold">
+                    Update
+                  </th>
                   {columns.map((column) => (
                     <th key={column.key} className="border-b border-r border-white/10 px-4 py-4 font-semibold">
                       {column.label}
@@ -191,16 +243,27 @@ export function RecordsTable() {
               <tbody>
                 {filteredRecords.map((record) => (
                   <tr key={record.id} className="border-b border-white/[0.06] odd:bg-white/[0.025] hover:bg-white/[0.045]">
+                    <td className="border-r border-white/[0.08] px-4 py-4 align-top">
+                      <button
+                        type="button"
+                        onClick={() => setEditingRecord(record)}
+                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-white transition hover:border-signal/40"
+                      >
+                        Update
+                      </button>
+                    </td>
                     {columns.map(({ key }) => (
                       <td key={key} className="max-w-[280px] border-r border-white/[0.08] px-4 py-4 align-top text-slate-100">
-                        {key === "created_at" ? (
-                          formatDate(record.created_at)
+                        {key === "created_at" || key === "updated_at" ? (
+                          formatDate(record[key])
                         ) : key === "lead_status" ? (
                           <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${statusPill(record.lead_status)}`}>
                             {record.lead_status}
                           </span>
                         ) : key === "lead_score" ? (
                           <span className="font-bold text-white">{String(record[key] ?? "")}</span>
+                        ) : key === "event_day" || key === "time_window" ? (
+                          <span className={record[key] ? "text-slate-100" : "text-slate-500"}>{record[key] || "Not set"}</span>
                         ) : (
                           String(record[key] ?? "")
                         )}
@@ -219,7 +282,7 @@ export function RecordsTable() {
                 ))}
                 {!filteredRecords.length && !isLoading ? (
                   <tr>
-                    <td colSpan={columns.length + 1} className="px-3 py-10 text-center text-slate-400">
+                    <td colSpan={columns.length + 2} className="px-3 py-10 text-center text-slate-400">
                       No records found.
                     </td>
                   </tr>
@@ -229,6 +292,36 @@ export function RecordsTable() {
           </div>
         </div>
       </section>
+
+      {editingRecord ? (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 px-4 py-6 backdrop-blur-sm">
+          <div className="mx-auto max-w-3xl rounded-3xl border border-white/10 bg-[#080b12] p-4 shadow-2xl shadow-black/40 sm:p-5">
+            <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-signal">Update Record</p>
+                <h2 className="mt-1 text-2xl font-bold text-white">{editingRecord.company_name || "Conversation record"}</h2>
+                <p className="mt-1 text-sm leading-5 text-slate-400">
+                  Saving updates this record, preserves its original created timestamp, and regenerates lead scoring and follow-up text.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingRecord(null)}
+                className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-slate-100"
+              >
+                Close
+              </button>
+            </div>
+            <ConversationForm
+              embedded
+              mode="edit"
+              initialRecord={editingRecord}
+              onSaved={handleRecordUpdated}
+              onCancel={() => setEditingRecord(null)}
+            />
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

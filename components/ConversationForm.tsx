@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import type { ConversationInput, ConversationRecord } from "@/lib/types";
 
 const roleOptions = [
@@ -27,6 +27,8 @@ const roleOptions = [
 ];
 
 const fields = {
+  event_day: ["Wed", "Thu", "Fri"],
+  time_window: ["Morning", "Noon", "Afternoon"],
   company_relevance: ["High", "Medium", "Low"],
   person_decision_proximity: ["Decision maker", "Influencer", "Referral only", "Not relevant"],
   pain_confirmed: ["Strongly", "Somewhat", "Not really"],
@@ -62,6 +64,8 @@ const initialForm: ConversationInput = {
   person_name: "",
   mobile: "",
   email: "",
+  event_day: "",
+  time_window: "",
   company_relevance: "",
   person_decision_proximity: "",
   pain_confirmed: "",
@@ -73,6 +77,28 @@ const initialForm: ConversationInput = {
   meeting_outcome: "",
   follow_up_consent: false
 };
+
+function formFromRecord(record?: ConversationInput | null): ConversationInput {
+  return {
+    company_name: record?.company_name ?? "",
+    role: record?.role ?? "",
+    person_name: record?.person_name ?? "",
+    mobile: record?.mobile ?? "",
+    email: record?.email ?? "",
+    event_day: record?.event_day ?? "",
+    time_window: record?.time_window ?? "",
+    company_relevance: record?.company_relevance ?? "",
+    person_decision_proximity: record?.person_decision_proximity ?? "",
+    pain_confirmed: record?.pain_confirmed ?? "",
+    pain_category: record?.pain_category ?? "",
+    pilot_possible: record?.pilot_possible ?? "",
+    next_step: record?.next_step ?? "",
+    notes: record?.notes ?? "",
+    previous_contact: record?.previous_contact ?? "",
+    meeting_outcome: record?.meeting_outcome ?? "",
+    follow_up_consent: Boolean(record?.follow_up_consent)
+  };
+}
 
 function inputClass() {
   return "mt-2 min-h-[52px] w-full rounded-xl border border-white/10 bg-[#0b111d]/90 px-4 py-3 text-base text-white shadow-inner shadow-black/20 outline-none transition focus:border-signal focus:ring-2 focus:ring-signal/20";
@@ -108,6 +134,7 @@ function SelectField({
   name,
   value,
   options,
+  placeholder = "Select...",
   onChange
 }: {
   label: string;
@@ -115,6 +142,7 @@ function SelectField({
   name: keyof ConversationInput;
   value: string;
   options: string[];
+  placeholder?: string;
   onChange: (name: keyof ConversationInput, value: string) => void;
 }) {
   return (
@@ -122,7 +150,7 @@ function SelectField({
       <span className="text-[0.95rem] font-semibold text-slate-100">{label}</span>
       {helper ? <span className="mt-1 block text-sm leading-5 text-slate-400">{helper}</span> : null}
       <select value={value} onChange={(event) => onChange(name, event.target.value)} className={inputClass()}>
-        <option value="">Select...</option>
+        <option value="">{placeholder}</option>
         {options.map((option) => (
           <option key={option} value={option}>
             {option}
@@ -160,12 +188,32 @@ function statusClasses(status?: string | null) {
   return "border-slate-500/35 bg-slate-700/25 text-slate-100";
 }
 
-export function ConversationForm() {
-  const [form, setForm] = useState<ConversationInput>(initialForm);
+export function ConversationForm({
+  initialRecord,
+  mode = "create",
+  embedded = false,
+  onSaved,
+  onCancel
+}: {
+  initialRecord?: ConversationRecord | null;
+  mode?: "create" | "edit";
+  embedded?: boolean;
+  onSaved?: (record: ConversationRecord) => void;
+  onCancel?: () => void;
+} = {}) {
+  const isEditMode = mode === "edit";
+  const [form, setForm] = useState<ConversationInput>(() => formFromRecord(initialRecord ?? initialForm));
   const [savedRecord, setSavedRecord] = useState<ConversationRecord | null>(null);
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setForm(formFromRecord(initialRecord ?? initialForm));
+    setSavedRecord(null);
+    setCopied(false);
+    setError("");
+  }, [initialRecord]);
 
   function updateField(name: keyof ConversationInput, value: string) {
     setForm((current) => ({ ...current, [name]: value }));
@@ -177,9 +225,9 @@ export function ConversationForm() {
     setIsSaving(true);
 
     const response = await fetch("/api/conversations", {
-      method: "POST",
+      method: isEditMode ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form)
+      body: JSON.stringify(isEditMode ? { ...form, id: initialRecord?.id } : form)
     });
 
     const data = await response.json();
@@ -187,6 +235,11 @@ export function ConversationForm() {
 
     if (!response.ok) {
       setError(data.error ?? "Could not save conversation.");
+      return;
+    }
+
+    if (isEditMode) {
+      onSaved?.(data.record);
       return;
     }
 
@@ -256,7 +309,8 @@ export function ConversationForm() {
   }
 
   return (
-    <main className="min-h-screen bg-field-console pb-28">
+    <main className={embedded ? "bg-field-console" : "min-h-screen bg-field-console pb-28"}>
+      {!embedded ? (
       <header className="sticky top-0 z-10 border-b border-white/10 bg-[#080b12]/88 px-4 py-4 backdrop-blur-xl">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4">
           <div className="min-w-0">
@@ -269,8 +323,9 @@ export function ConversationForm() {
           </Link>
         </div>
       </header>
+      ) : null}
 
-      <form onSubmit={handleSubmit} className="mx-auto grid w-full max-w-3xl gap-5 px-4 py-5">
+      <form onSubmit={handleSubmit} className={embedded ? "grid w-full gap-5" : "mx-auto grid w-full max-w-3xl gap-5 px-4 py-5"}>
         <FormSection eyebrow="01" title="Company & Contact">
           <TextField label="Company Name" name="company_name" value={form.company_name ?? ""} onChange={updateField} />
           <SelectField label="Role" name="role" value={form.role ?? ""} options={roleOptions} onChange={updateField} />
@@ -279,6 +334,24 @@ export function ConversationForm() {
             <TextField label="Mobile" name="mobile" value={form.mobile ?? ""} onChange={updateField} />
           </div>
           <TextField label="Email" name="email" type="email" value={form.email ?? ""} onChange={updateField} />
+          <div className="grid gap-5 sm:grid-cols-2">
+            <SelectField
+              label="Event Day"
+              name="event_day"
+              value={form.event_day ?? ""}
+              options={fields.event_day}
+              placeholder="Not set"
+              onChange={updateField}
+            />
+            <SelectField
+              label="Time Window"
+              name="time_window"
+              value={form.time_window ?? ""}
+              options={fields.time_window}
+              placeholder="Not set"
+              onChange={updateField}
+            />
+          </div>
         </FormSection>
 
         <FormSection eyebrow="02" title="Relevance & Decision Fit">
@@ -365,16 +438,27 @@ export function ConversationForm() {
 
         {error ? <p className="rounded-xl border border-red-500/40 bg-red-950/50 p-3 text-sm text-red-200">{error}</p> : null}
 
-        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-[#080b12]/92 px-4 py-3 backdrop-blur-xl sm:static sm:rounded-2xl sm:border sm:bg-[#101827]/80 sm:p-4">
+        <div className={embedded ? "rounded-2xl border border-white/10 bg-[#101827]/80 p-4" : "fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-[#080b12]/92 px-4 py-3 backdrop-blur-xl sm:static sm:rounded-2xl sm:border sm:bg-[#101827]/80 sm:p-4"}>
           <div className="mx-auto max-w-3xl">
             <p className="mb-2 text-center text-sm text-slate-400 sm:text-left">All fields are optional. Save whatever you captured.</p>
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="h-14 w-full rounded-xl bg-signal px-5 text-base font-bold text-ink shadow-xl shadow-signal/10 transition hover:bg-[#7be3c7] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isSaving ? "Saving..." : "Save Conversation"}
-            </button>
+            <div className={embedded ? "grid gap-3 sm:grid-cols-[1fr_auto]" : ""}>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="h-14 w-full rounded-xl bg-signal px-5 text-base font-bold text-ink shadow-xl shadow-signal/10 transition hover:bg-[#7be3c7] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSaving ? "Saving..." : isEditMode ? "Save Update" : "Save Conversation"}
+              </button>
+              {embedded && onCancel ? (
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="h-14 rounded-xl border border-white/10 bg-white/5 px-5 text-base font-semibold text-white"
+                >
+                  Cancel
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
       </form>

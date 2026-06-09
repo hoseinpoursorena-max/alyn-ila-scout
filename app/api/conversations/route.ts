@@ -4,7 +4,7 @@ import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import type { ConversationInput } from "@/lib/types";
 
 function normalizePayload(payload: ConversationInput): ConversationInput {
-  const clean = (value?: string | null) => (typeof value === "string" && value.trim() ? value.trim() : null);
+  const clean = (value?: string | null) => (typeof value === "string" && value.trim() && value.trim() !== "Not set" ? value.trim() : null);
 
   return {
     company_name: clean(payload.company_name),
@@ -12,6 +12,8 @@ function normalizePayload(payload: ConversationInput): ConversationInput {
     person_name: clean(payload.person_name),
     mobile: clean(payload.mobile),
     email: clean(payload.email),
+    event_day: clean(payload.event_day),
+    time_window: clean(payload.time_window),
     company_relevance: clean(payload.company_relevance),
     person_decision_proximity: clean(payload.person_decision_proximity),
     pain_confirmed: clean(payload.pain_confirmed),
@@ -64,6 +66,41 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ record: data }, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unexpected error." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const body = (await request.json()) as ConversationInput & { id?: string };
+
+    if (!body.id) {
+      return NextResponse.json({ error: "Conversation id is required." }, { status: 400 });
+    }
+
+    const normalized = normalizePayload(body);
+    const enriched = enrichConversation(normalized);
+    const supabase = getSupabaseAdmin();
+
+    const { data, error } = await supabase
+      .from("ila_conversations")
+      .update({
+        ...enriched,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", body.id)
+      .select("*")
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ record: data });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unexpected error." },
