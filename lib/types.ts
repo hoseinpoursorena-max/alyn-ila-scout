@@ -7,6 +7,9 @@ export type ConversationInput = {
   event_day?: string | null;
   time_window?: string | null;
   meeting_time?: string | null;
+  hall?: string | null;
+  stand_number?: string | null;
+  shared_stand?: string | null;
   country?: string | null;
   linkedin_connected?: boolean | null;
   linkedin_message_sent_to?: string | null;

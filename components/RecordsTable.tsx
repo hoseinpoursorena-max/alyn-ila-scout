@@ -17,6 +17,9 @@ const columns: Column[] = [
   { key: "event_day", label: "Event Day", widthClass: "min-w-[110px] w-[110px] max-w-[110px]" },
   { key: "time_window", label: "Time Window", widthClass: "min-w-[130px] w-[130px] max-w-[130px]" },
   { key: "meeting_time", label: "Meeting Time", widthClass: "min-w-[130px] w-[130px] max-w-[130px]" },
+  { key: "hall", label: "Hall", widthClass: "min-w-[120px] w-[120px] max-w-[120px]" },
+  { key: "stand_number", label: "Stand Number", widthClass: "min-w-[150px] w-[150px] max-w-[150px]" },
+  { key: "shared_stand", label: "Shared Stand / Together With", widthClass: "min-w-[320px] w-[320px] max-w-[320px]" },
   { key: "country", label: "Country", widthClass: "min-w-[130px] w-[130px] max-w-[130px]" },
   { key: "company_name", label: "Company", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
   { key: "person_name", label: "Person", widthClass: "min-w-[160px] w-[160px] max-w-[160px]" },
@@ -56,6 +59,7 @@ const defaultColumnWidth = "min-w-[140px] w-[140px] max-w-[140px]";
 const scrollableTextColumns = new Set<keyof ConversationRecord>([
   "notes",
   "linkedin_reply_notes",
+  "shared_stand",
   "next_step",
   "meeting_outcome",
   "excel_do_what",
@@ -80,7 +84,17 @@ function displayValue(record: ConversationRecord, key: keyof ConversationRecord)
   if (key === "linkedin_connected") return record.linkedin_connected ? "Yes" : "No";
   if (key === "linkedin_message_status") return record.linkedin_message_status || "Not contacted";
   if (key === "linkedin_message_sent_to" || key === "linkedin_reply_notes") return record[key] || "Not set";
-  if (key === "event_day" || key === "time_window" || key === "meeting_time" || key === "country") return record[key] || "Not set";
+  if (
+    key === "event_day" ||
+    key === "time_window" ||
+    key === "meeting_time" ||
+    key === "hall" ||
+    key === "stand_number" ||
+    key === "shared_stand" ||
+    key === "country"
+  ) {
+    return record[key] || "Not set";
+  }
   if (String(key).startsWith("excel_")) return record[key] || "Not set";
   return String(record[key] ?? "");
 }
@@ -118,6 +132,8 @@ export function RecordsTable() {
   const [eventDay, setEventDay] = useState("");
   const [timeWindow, setTimeWindow] = useState("");
   const [meetingTime, setMeetingTime] = useState("");
+  const [hall, setHall] = useState("");
+  const [standNumber, setStandNumber] = useState("");
   const [country, setCountry] = useState("");
   const [linkedinConnected, setLinkedinConnected] = useState("");
   const [linkedinMessageStatus, setLinkedinMessageStatus] = useState("");
@@ -154,19 +170,23 @@ export function RecordsTable() {
       const matchesEventDay = !eventDay || (record.event_day ?? "") === eventDay;
       const matchesTimeWindow = !timeWindow || (record.time_window ?? "") === timeWindow;
       const matchesMeetingTime = !meetingTime || (record.meeting_time ?? "") === meetingTime;
+      const matchesHall = !hall || (record.hall ?? "") === hall;
+      const matchesStandNumber =
+        !standNumber || String(record.stand_number ?? "").toLowerCase().includes(standNumber.toLowerCase());
       const matchesCountry = !country || (record.country ?? "").toLowerCase() === country.toLowerCase();
       const matchesLinkedin =
         !linkedinConnected ||
         (linkedinConnected === "Yes" ? Boolean(record.linkedin_connected) : !record.linkedin_connected);
       const matchesLinkedinStatus =
         !linkedinMessageStatus || (record.linkedin_message_status ?? "Not contacted") === linkedinMessageStatus;
-      return matchesSearch && matchesOutcome && matchesEventDay && matchesTimeWindow && matchesMeetingTime && matchesCountry && matchesLinkedin && matchesLinkedinStatus;
+      return matchesSearch && matchesOutcome && matchesEventDay && matchesTimeWindow && matchesMeetingTime && matchesHall && matchesStandNumber && matchesCountry && matchesLinkedin && matchesLinkedinStatus;
     });
-  }, [records, search, meetingOutcome, eventDay, timeWindow, meetingTime, country, linkedinConnected, linkedinMessageStatus]);
+  }, [records, search, meetingOutcome, eventDay, timeWindow, meetingTime, hall, standNumber, country, linkedinConnected, linkedinMessageStatus]);
 
   const meetingOutcomes = Array.from(new Set(records.map((record) => record.meeting_outcome).filter(Boolean)));
   const eventDays = ["Wed", "Thu", "Fri"];
   const timeWindows = ["Morning", "Noon", "Afternoon"];
+  const halls = ["Hall A", "Hall B", "Hall C", "Hall D", "Outside"];
   const meetingTimes = [
     "10:00",
     "10:30",
@@ -253,9 +273,14 @@ export function RecordsTable() {
             <h1 className="mt-1 text-2xl font-bold text-slate-950 sm:text-3xl">Conversation Records</h1>
             <p className="mt-1 text-sm leading-5 text-slate-600">Review captured contacts, meeting timing, notes, and export CSV.</p>
           </div>
-          <Link href="/" className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm">
-            New Conversation
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/plan" className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm">
+              View Plan
+            </Link>
+            <Link href="/" className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm">
+              New Conversation
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -290,7 +315,7 @@ export function RecordsTable() {
             </button>
           </div>
 
-          <div className="mt-3 grid gap-3 md:grid-cols-[160px_180px_180px_180px_170px_220px]">
+          <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-[150px_170px_170px_140px_170px_170px_160px_220px]">
             <select
               value={eventDay}
               onChange={(event) => setEventDay(event.target.value)}
@@ -327,6 +352,24 @@ export function RecordsTable() {
                 </option>
               ))}
             </select>
+            <select
+              value={hall}
+              onChange={(event) => setHall(event.target.value)}
+              className="h-[52px] rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-950 shadow-sm outline-none transition focus:border-signal focus:ring-2 focus:ring-signal/20"
+            >
+              <option value="">All halls</option>
+              {halls.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+            <input
+              value={standNumber}
+              onChange={(event) => setStandNumber(event.target.value)}
+              placeholder="Stand number"
+              className="h-[52px] rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-950 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-signal focus:ring-2 focus:ring-signal/20"
+            />
             <select
               value={country}
               onChange={(event) => setCountry(event.target.value)}
@@ -373,7 +416,7 @@ export function RecordsTable() {
 
         <div className="mt-5 rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="max-h-[min(720px,calc(100vh-330px))] w-full overflow-auto [scrollbar-gutter:stable_both-edges]">
-            <table className="min-w-[4200px] border-collapse text-left text-sm">
+            <table className="min-w-[4800px] border-collapse text-left text-sm">
               <thead className="sticky top-0 z-20 bg-slate-100 text-xs uppercase tracking-[0.04em] text-slate-600">
                 <tr>
                   <th className="min-w-[90px] w-[90px] max-w-[90px] whitespace-nowrap border-b border-r border-slate-200 px-3 py-3 font-semibold">
@@ -433,7 +476,7 @@ export function RecordsTable() {
                           ) : (
                             <span className={record[key] ? "text-slate-800" : "text-slate-400"}>{record[key] || "Not set"}</span>
                           )
-                        ) : key === "event_day" || key === "time_window" || key === "meeting_time" || key === "country" ? (
+                        ) : key === "event_day" || key === "time_window" || key === "meeting_time" || key === "hall" || key === "stand_number" || key === "country" ? (
                           <span className={record[key] ? "text-slate-800" : "text-slate-400"}>{record[key] || "Not set"}</span>
                         ) : String(key).startsWith("excel_") ? (
                           scrollableTextColumns.has(key) ? (

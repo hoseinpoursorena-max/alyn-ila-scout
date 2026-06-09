@@ -4,31 +4,10 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import type { ConversationInput, ConversationRecord } from "@/lib/types";
 
-const roleOptions = [
-  "Head of Operations",
-  "Operations Director",
-  "COO",
-  "General Manager",
-  "Production Director",
-  "Head of Production",
-  "Plant Manager",
-  "Production Program Manager",
-  "Head of Engineering",
-  "Manufacturing Engineering Manager",
-  "Technical Director",
-  "Supply Chain Director",
-  "Procurement Director",
-  "Quality Manager",
-  "AS9100 / Compliance Manager",
-  "Estimating Manager",
-  "Business Development Manager",
-  "CTO / Digital Transformation Lead",
-  "Other"
-];
-
 const fields = {
   event_day: ["Wed", "Thu", "Fri"],
   time_window: ["Morning", "Noon", "Afternoon"],
+  hall: ["Hall A", "Hall B", "Hall C", "Hall D", "Outside"],
   meeting_time: [
     "10:00",
     "10:30",
@@ -98,6 +77,9 @@ const initialForm: ConversationInput = {
   event_day: "",
   time_window: "",
   meeting_time: "",
+  hall: "",
+  stand_number: "",
+  shared_stand: "",
   country: "",
   linkedin_connected: false,
   linkedin_message_sent_to: "",
@@ -125,6 +107,9 @@ function formFromRecord(record?: ConversationInput | null): ConversationInput {
     event_day: record?.event_day ?? "",
     time_window: record?.time_window ?? "",
     meeting_time: record?.meeting_time ?? "",
+    hall: record?.hall ?? "",
+    stand_number: record?.stand_number ?? "",
+    shared_stand: record?.shared_stand ?? "",
     country: record?.country ?? "",
     linkedin_connected: Boolean(record?.linkedin_connected),
     linkedin_message_sent_to: record?.linkedin_message_sent_to ?? "",
@@ -152,6 +137,7 @@ function TextField({
   helper,
   name,
   type = "text",
+  placeholder,
   value,
   onChange
 }: {
@@ -159,6 +145,7 @@ function TextField({
   helper?: string;
   name: keyof ConversationInput;
   type?: string;
+  placeholder?: string;
   value: string;
   onChange: (name: keyof ConversationInput, value: string) => void;
 }) {
@@ -166,7 +153,13 @@ function TextField({
     <label className="block">
       <span className="text-[0.95rem] font-semibold text-slate-900">{label}</span>
       {helper ? <span className="mt-1 block text-sm leading-5 text-slate-500">{helper}</span> : null}
-      <input type={type} value={value} onChange={(event) => onChange(name, event.target.value)} className={inputClass()} />
+      <input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        onChange={(event) => onChange(name, event.target.value)}
+        className={inputClass()}
+      />
     </label>
   );
 }
@@ -210,6 +203,7 @@ function TextAreaField({
   name,
   value,
   rows = 3,
+  placeholder,
   onChange
 }: {
   label: string;
@@ -217,6 +211,7 @@ function TextAreaField({
   name: keyof ConversationInput;
   value: string;
   rows?: number;
+  placeholder?: string;
   onChange: (name: keyof ConversationInput, value: string) => void;
 }) {
   return (
@@ -225,6 +220,7 @@ function TextAreaField({
       {helper ? <span className="mt-1 block text-sm leading-5 text-slate-500">{helper}</span> : null}
       <textarea
         value={value}
+        placeholder={placeholder}
         onChange={(event) => onChange(name, event.target.value)}
         rows={rows}
         className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base leading-6 text-slate-950 shadow-sm outline-none transition focus:border-signal focus:ring-2 focus:ring-signal/20"
@@ -346,6 +342,8 @@ export function ConversationForm({
                 <SummaryRow label="Role" value={savedRecord.role} />
                 <SummaryRow label="Event day" value={savedRecord.event_day} />
                 <SummaryRow label="Meeting time" value={savedRecord.meeting_time} />
+                <SummaryRow label="Hall" value={savedRecord.hall} />
+                <SummaryRow label="Stand number" value={savedRecord.stand_number} />
                 <SummaryRow label="LinkedIn status" value={savedRecord.linkedin_message_status || "Not contacted"} />
               </dl>
             </div>
@@ -384,7 +382,13 @@ export function ConversationForm({
       <form onSubmit={handleSubmit} className={embedded ? "grid w-full gap-5" : "mx-auto grid w-full max-w-3xl gap-5 px-4 py-5"}>
         <FormSection eyebrow="01" title="Company & Contact">
           <TextField label="Company Name" name="company_name" value={form.company_name ?? ""} onChange={updateField} />
-          <SelectField label="Role" name="role" value={form.role ?? ""} options={roleOptions} onChange={updateField} />
+          <TextField
+            label="Role"
+            name="role"
+            value={form.role ?? ""}
+            placeholder="e.g. CEO, Head of Operations, Sales Director, GF"
+            onChange={updateField}
+          />
           <div className="grid gap-5 sm:grid-cols-2">
             <TextField label="Person Name" name="person_name" value={form.person_name ?? ""} onChange={updateField} />
             <TextField label="Mobile" name="mobile" value={form.mobile ?? ""} onChange={updateField} />
@@ -441,12 +445,37 @@ export function ConversationForm({
               onChange={updateField}
             />
           </div>
-          <SelectField
-            label="Meeting Time"
-            name="meeting_time"
-            value={form.meeting_time ?? ""}
-            options={fields.meeting_time}
-            placeholder="Not set"
+          <div className="grid gap-5 sm:grid-cols-2">
+            <SelectField
+              label="Meeting Time"
+              name="meeting_time"
+              value={form.meeting_time ?? ""}
+              options={fields.meeting_time}
+              placeholder="Not set"
+              onChange={updateField}
+            />
+            <SelectField
+              label="Hall"
+              name="hall"
+              value={form.hall ?? ""}
+              options={fields.hall}
+              placeholder="Not set"
+              onChange={updateField}
+            />
+          </div>
+          <TextField
+            label="Stand Number"
+            name="stand_number"
+            value={form.stand_number ?? ""}
+            placeholder="e.g. 240, A-12, 3B-18"
+            onChange={updateField}
+          />
+          <TextAreaField
+            label="Shared Stand / Together With"
+            name="shared_stand"
+            value={form.shared_stand ?? ""}
+            placeholder="e.g. together with partner companies at one stand"
+            rows={2}
             onChange={updateField}
           />
         </FormSection>
