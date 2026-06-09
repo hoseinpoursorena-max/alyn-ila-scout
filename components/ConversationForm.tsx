@@ -253,11 +253,17 @@ function FormSection({
   );
 }
 
-function statusClasses(status?: string | null) {
-  if (status === "Hot Lead") return "border-amber-300 bg-amber-50 text-amber-900";
-  if (status === "Warm Lead") return "border-emerald-300 bg-emerald-50 text-emerald-900";
-  if (status === "Nurture") return "border-sky-300 bg-sky-50 text-sky-900";
-  return "border-slate-200 bg-slate-50 text-slate-700";
+function SummaryRow({ label, value }: { label: string; value?: string | null }) {
+  const display = value?.trim() || "Not set";
+
+  return (
+    <div className="grid gap-2 border-t border-slate-200 py-3 first:border-t-0 sm:grid-cols-[160px_1fr]">
+      <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</dt>
+      <dd className={display === "Not set" ? "text-sm font-medium text-slate-400" : "text-sm font-medium text-slate-900"}>
+        {display}
+      </dd>
+    </div>
+  );
 }
 
 export function ConversationForm({
@@ -278,12 +284,10 @@ export function ConversationForm({
   const [savedRecord, setSavedRecord] = useState<ConversationRecord | null>(null);
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setForm(formFromRecord(initialRecord ?? initialForm));
     setSavedRecord(null);
-    setCopied(false);
     setError("");
   }, [initialRecord]);
 
@@ -318,17 +322,9 @@ export function ConversationForm({
     setSavedRecord(data.record);
   }
 
-  async function copyFollowUp() {
-    if (!savedRecord?.generated_follow_up) return;
-    await navigator.clipboard.writeText(savedRecord.generated_follow_up);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1500);
-  }
-
   function startNew() {
     setForm(initialForm);
     setSavedRecord(null);
-    setCopied(false);
     setError("");
   }
 
@@ -337,36 +333,24 @@ export function ConversationForm({
       <main className="min-h-screen bg-field-console px-4 py-6">
         <section className="mx-auto w-full max-w-3xl">
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Conversation Saved</p>
-            <h1 className="mt-2 text-2xl font-semibold text-slate-950 sm:text-3xl">Lead intelligence ready</h1>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">CONVERSATION SAVED</p>
+            <h1 className="mt-2 text-2xl font-semibold text-slate-950 sm:text-3xl">Conversation saved</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Score, status, next action, and follow-up message were generated from the captured conversation.
+              The conversation has been added to your ILA records.
             </p>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-[0.8fr_1.2fr]">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lead Score</p>
-                <p className="mt-2 text-5xl font-bold text-slate-950">{savedRecord.lead_score}</p>
-                <p className="mt-1 text-sm text-slate-500">Capped at 100</p>
-              </div>
-              <div className={`rounded-2xl border p-5 ${statusClasses(savedRecord.lead_status)}`}>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] opacity-80">Lead Status</p>
-                <p className="mt-2 text-3xl font-bold">{savedRecord.lead_status}</p>
-                <p className="mt-3 text-sm leading-6 opacity-90">{savedRecord.suggested_action}</p>
-              </div>
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+              <dl>
+                <SummaryRow label="Company" value={savedRecord.company_name} />
+                <SummaryRow label="Person" value={savedRecord.person_name} />
+                <SummaryRow label="Role" value={savedRecord.role} />
+                <SummaryRow label="Event day" value={savedRecord.event_day} />
+                <SummaryRow label="Meeting time" value={savedRecord.meeting_time} />
+                <SummaryRow label="LinkedIn status" value={savedRecord.linkedin_message_status || "Not contacted"} />
+              </dl>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Generated Follow-up Message</p>
-              <pre className="mt-4 max-h-[460px] overflow-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-4 text-[0.95rem] leading-7 text-slate-800">
-                {savedRecord.generated_follow_up}
-              </pre>
-            </div>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              <button type="button" onClick={copyFollowUp} className="h-[52px] rounded-xl bg-signal px-4 font-bold text-ink shadow-lg shadow-signal/10">
-                {copied ? "Copied" : "Copy Follow-up"}
-              </button>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <button type="button" onClick={startNew} className="h-[52px] rounded-xl border border-slate-200 bg-white px-4 font-semibold text-slate-900">
                 New Conversation
               </button>
