@@ -8,48 +8,50 @@ import type { ConversationRecord } from "@/lib/types";
 type Column = {
   key: keyof ConversationRecord;
   label: string;
-  className?: string;
+  widthClass?: string;
 };
 
 const columns: Column[] = [
-  { key: "created_at", label: "Created At" },
-  { key: "updated_at", label: "Updated At" },
-  { key: "event_day", label: "Event Day" },
-  { key: "time_window", label: "Time Window" },
-  { key: "meeting_time", label: "Meeting Time" },
-  { key: "country", label: "Country" },
-  { key: "company_name", label: "Company" },
-  { key: "person_name", label: "Person" },
-  { key: "role", label: "Role" },
-  { key: "linkedin_connected", label: "LinkedIn Connected" },
-  { key: "linkedin_message_status", label: "LinkedIn Status" },
-  { key: "meeting_outcome", label: "Meeting Outcome", className: "min-w-[260px] w-[260px] max-w-[260px]" },
-  { key: "notes", label: "Notes", className: "min-w-[440px] w-[440px] max-w-[440px]" },
-  { key: "linkedin_message_sent_to", label: "LinkedIn Sent To" },
-  { key: "linkedin_reply_notes", label: "LinkedIn Notes", className: "min-w-[360px] w-[360px] max-w-[360px]" },
-  { key: "email", label: "Email" },
-  { key: "mobile", label: "Mobile" },
-  { key: "company_relevance", label: "Company Relevance" },
-  { key: "person_decision_proximity", label: "Decision Proximity" },
-  { key: "pain_confirmed", label: "Pain Confirmed" },
-  { key: "pain_category", label: "Pain Category" },
-  { key: "pilot_possible", label: "Pilot Possible" },
-  { key: "next_step", label: "Next Step", className: "min-w-[240px] w-[240px] max-w-[240px]" },
+  { key: "created_at", label: "Created At", widthClass: "min-w-[120px] w-[120px] max-w-[120px]" },
+  { key: "updated_at", label: "Updated At", widthClass: "min-w-[120px] w-[120px] max-w-[120px]" },
+  { key: "event_day", label: "Event Day", widthClass: "min-w-[110px] w-[110px] max-w-[110px]" },
+  { key: "time_window", label: "Time Window", widthClass: "min-w-[130px] w-[130px] max-w-[130px]" },
+  { key: "meeting_time", label: "Meeting Time", widthClass: "min-w-[130px] w-[130px] max-w-[130px]" },
+  { key: "country", label: "Country", widthClass: "min-w-[130px] w-[130px] max-w-[130px]" },
+  { key: "company_name", label: "Company", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
+  { key: "person_name", label: "Person", widthClass: "min-w-[160px] w-[160px] max-w-[160px]" },
+  { key: "role", label: "Role", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
+  { key: "linkedin_connected", label: "LinkedIn Connected", widthClass: "min-w-[170px] w-[170px] max-w-[170px]" },
+  { key: "linkedin_message_status", label: "LinkedIn Status", widthClass: "min-w-[150px] w-[150px] max-w-[150px]" },
+  { key: "meeting_outcome", label: "Meeting Outcome", widthClass: "min-w-[190px] w-[190px] max-w-[190px]" },
+  { key: "notes", label: "Notes", widthClass: "min-w-[440px] w-[440px] max-w-[440px]" },
+  { key: "linkedin_message_sent_to", label: "LinkedIn Sent To", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
+  { key: "linkedin_reply_notes", label: "LinkedIn Notes", widthClass: "min-w-[320px] w-[320px] max-w-[320px]" },
+  { key: "email", label: "Email", widthClass: "min-w-[220px] w-[220px] max-w-[220px]" },
+  { key: "mobile", label: "Mobile", widthClass: "min-w-[140px] w-[140px] max-w-[140px]" },
+  { key: "company_relevance", label: "Company Relevance", widthClass: "min-w-[170px] w-[170px] max-w-[170px]" },
+  { key: "person_decision_proximity", label: "Decision Proximity", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
+  { key: "pain_confirmed", label: "Pain Confirmed", widthClass: "min-w-[160px] w-[160px] max-w-[160px]" },
+  { key: "pain_category", label: "Pain Category", widthClass: "min-w-[160px] w-[160px] max-w-[160px]" },
+  { key: "pilot_possible", label: "Pilot Possible", widthClass: "min-w-[150px] w-[150px] max-w-[150px]" },
+  { key: "next_step", label: "Next Step", widthClass: "min-w-[260px] w-[260px] max-w-[260px]" },
   { key: "excel_row_number", label: "Excel Row" },
-  { key: "excel_company", label: "Excel Company" },
+  { key: "excel_company", label: "Excel Company", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
   { key: "excel_hq", label: "Excel HQ" },
-  { key: "excel_ld_contact", label: "LD Contact" },
-  { key: "excel_role_on_ld", label: "Role on LD" },
+  { key: "excel_ld_contact", label: "LD Contact", widthClass: "min-w-[160px] w-[160px] max-w-[160px]" },
+  { key: "excel_role_on_ld", label: "Role on LD", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
   { key: "excel_replied", label: "Replied?" },
   { key: "excel_interested", label: "Interested?" },
-  { key: "excel_ila_contact", label: "ILA Contact" },
-  { key: "excel_ila_contact_role", label: "ILA Contact Role" },
+  { key: "excel_ila_contact", label: "ILA Contact", widthClass: "min-w-[160px] w-[160px] max-w-[160px]" },
+  { key: "excel_ila_contact_role", label: "ILA Contact Role", widthClass: "min-w-[180px] w-[180px] max-w-[180px]" },
   { key: "excel_meet_at_ila", label: "Meet at ILA" },
-  { key: "excel_do_what", label: "Do what?", className: "min-w-[360px] w-[360px] max-w-[360px]" },
+  { key: "excel_do_what", label: "Do what?", widthClass: "min-w-[320px] w-[320px] max-w-[320px]" },
   { key: "excel_day", label: "Excel Day" },
   { key: "excel_time", label: "Excel Time" },
-  { key: "excel_meet_after_ila", label: "Meet after ILA", className: "min-w-[300px] w-[300px] max-w-[300px]" }
+  { key: "excel_meet_after_ila", label: "Meet after ILA", widthClass: "min-w-[300px] w-[300px] max-w-[300px]" }
 ];
+
+const defaultColumnWidth = "min-w-[140px] w-[140px] max-w-[140px]";
 
 const scrollableTextColumns = new Set<keyof ConversationRecord>([
   "notes",
@@ -103,7 +105,7 @@ function ScrollableCellText({ value }: { value: unknown }) {
   const text = value === null || value === undefined || value === "" ? "Not set" : String(value);
 
   return (
-    <div className="max-h-[120px] overflow-y-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6">
+    <div className="max-h-[72px] overflow-y-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm leading-[1.4]">
       <span className={text === "Not set" ? "text-slate-400" : "text-slate-800"}>{text}</span>
     </div>
   );
@@ -370,18 +372,18 @@ export function RecordsTable() {
         {error ? <p className="mt-6 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
 
         <div className="mt-5 rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="w-full overflow-x-scroll pb-3 [scrollbar-gutter:stable]">
+          <div className="max-h-[min(720px,calc(100vh-330px))] w-full overflow-auto [scrollbar-gutter:stable_both-edges]">
             <table className="min-w-[4200px] border-collapse text-left text-sm">
-              <thead className="sticky top-0 bg-slate-100 text-xs uppercase tracking-[0.04em] text-slate-600">
+              <thead className="sticky top-0 z-20 bg-slate-100 text-xs uppercase tracking-[0.04em] text-slate-600">
                 <tr>
-                  <th className="border-b border-r border-slate-200 px-4 py-4 font-semibold">
+                  <th className="min-w-[90px] w-[90px] max-w-[90px] whitespace-nowrap border-b border-r border-slate-200 px-3 py-3 font-semibold">
                     Update
                   </th>
-                  <th className="border-b border-r border-slate-200 px-4 py-4 font-semibold">
+                  <th className="min-w-[90px] w-[90px] max-w-[90px] whitespace-nowrap border-b border-r border-slate-200 px-3 py-3 font-semibold">
                     Delete
                   </th>
                   {columns.map((column) => (
-                    <th key={column.key} className={`border-b border-r border-slate-200 px-4 py-4 font-semibold ${column.className ?? ""}`}>
+                    <th key={column.key} className={`whitespace-nowrap border-b border-r border-slate-200 px-3 py-3 font-semibold ${column.widthClass ?? defaultColumnWidth}`}>
                       {column.label}
                     </th>
                   ))}
@@ -390,7 +392,7 @@ export function RecordsTable() {
               <tbody>
                 {filteredRecords.map((record) => (
                   <tr key={record.id} className="border-b border-slate-100 odd:bg-slate-50/60 hover:bg-emerald-50/40">
-                    <td className="border-r border-slate-100 px-4 py-4 align-top">
+                    <td className="min-w-[90px] w-[90px] max-w-[90px] border-r border-slate-100 px-3 py-3 align-top">
                       <button
                         type="button"
                         onClick={() => setEditingRecord(record)}
@@ -399,7 +401,7 @@ export function RecordsTable() {
                         Update
                       </button>
                     </td>
-                    <td className="border-r border-slate-100 px-4 py-4 align-top">
+                    <td className="min-w-[90px] w-[90px] max-w-[90px] border-r border-slate-100 px-3 py-3 align-top">
                       <button
                         type="button"
                         onClick={() => deleteRecord(record)}
@@ -409,8 +411,8 @@ export function RecordsTable() {
                         {deletingId === record.id ? "Deleting" : "Delete"}
                       </button>
                     </td>
-                    {columns.map(({ key, className }) => (
-                      <td key={key} className={`max-w-[280px] border-r border-slate-100 px-4 py-4 align-top text-slate-800 ${className ?? ""}`}>
+                    {columns.map(({ key, widthClass }) => (
+                      <td key={key} className={`border-r border-slate-100 px-3 py-3 align-top text-slate-800 ${widthClass ?? defaultColumnWidth}`}>
                         {key === "created_at" || key === "updated_at" ? (
                           formatDate(record[key])
                         ) : key === "company_relevance" ? (
