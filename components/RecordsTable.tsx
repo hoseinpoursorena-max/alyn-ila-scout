@@ -5,7 +5,13 @@ import { useEffect, useMemo, useState } from "react";
 import { ConversationForm } from "@/components/ConversationForm";
 import type { ConversationRecord } from "@/lib/types";
 
-const columns: Array<{ key: keyof ConversationRecord; label: string }> = [
+type Column = {
+  key: keyof ConversationRecord;
+  label: string;
+  className?: string;
+};
+
+const columns: Column[] = [
   { key: "created_at", label: "Created At" },
   { key: "updated_at", label: "Updated At" },
   { key: "event_day", label: "Event Day" },
@@ -16,9 +22,11 @@ const columns: Array<{ key: keyof ConversationRecord; label: string }> = [
   { key: "person_name", label: "Person" },
   { key: "role", label: "Role" },
   { key: "linkedin_connected", label: "LinkedIn Connected" },
-  { key: "linkedin_message_sent_to", label: "LinkedIn Sent To" },
   { key: "linkedin_message_status", label: "LinkedIn Status" },
-  { key: "linkedin_reply_notes", label: "LinkedIn Notes" },
+  { key: "meeting_outcome", label: "Meeting Outcome", className: "min-w-[260px] w-[260px] max-w-[260px]" },
+  { key: "notes", label: "Notes", className: "min-w-[440px] w-[440px] max-w-[440px]" },
+  { key: "linkedin_message_sent_to", label: "LinkedIn Sent To" },
+  { key: "linkedin_reply_notes", label: "LinkedIn Notes", className: "min-w-[360px] w-[360px] max-w-[360px]" },
   { key: "email", label: "Email" },
   { key: "mobile", label: "Mobile" },
   { key: "company_relevance", label: "Company Relevance" },
@@ -26,10 +34,31 @@ const columns: Array<{ key: keyof ConversationRecord; label: string }> = [
   { key: "pain_confirmed", label: "Pain Confirmed" },
   { key: "pain_category", label: "Pain Category" },
   { key: "pilot_possible", label: "Pilot Possible" },
-  { key: "next_step", label: "Next Step" },
-  { key: "meeting_outcome", label: "Meeting Outcome" },
-  { key: "notes", label: "Notes" }
+  { key: "next_step", label: "Next Step", className: "min-w-[240px] w-[240px] max-w-[240px]" },
+  { key: "excel_row_number", label: "Excel Row" },
+  { key: "excel_company", label: "Excel Company" },
+  { key: "excel_hq", label: "Excel HQ" },
+  { key: "excel_ld_contact", label: "LD Contact" },
+  { key: "excel_role_on_ld", label: "Role on LD" },
+  { key: "excel_replied", label: "Replied?" },
+  { key: "excel_interested", label: "Interested?" },
+  { key: "excel_ila_contact", label: "ILA Contact" },
+  { key: "excel_ila_contact_role", label: "ILA Contact Role" },
+  { key: "excel_meet_at_ila", label: "Meet at ILA" },
+  { key: "excel_do_what", label: "Do what?", className: "min-w-[360px] w-[360px] max-w-[360px]" },
+  { key: "excel_day", label: "Excel Day" },
+  { key: "excel_time", label: "Excel Time" },
+  { key: "excel_meet_after_ila", label: "Meet after ILA", className: "min-w-[300px] w-[300px] max-w-[300px]" }
 ];
+
+const scrollableTextColumns = new Set<keyof ConversationRecord>([
+  "notes",
+  "linkedin_reply_notes",
+  "next_step",
+  "meeting_outcome",
+  "excel_do_what",
+  "excel_meet_after_ila"
+]);
 
 function csvEscape(value: unknown) {
   const text = value === null || value === undefined ? "" : String(value);
@@ -50,6 +79,7 @@ function displayValue(record: ConversationRecord, key: keyof ConversationRecord)
   if (key === "linkedin_message_status") return record.linkedin_message_status || "Not contacted";
   if (key === "linkedin_message_sent_to" || key === "linkedin_reply_notes") return record[key] || "Not set";
   if (key === "event_day" || key === "time_window" || key === "meeting_time" || key === "country") return record[key] || "Not set";
+  if (String(key).startsWith("excel_")) return record[key] || "Not set";
   return String(record[key] ?? "");
 }
 
@@ -67,6 +97,16 @@ function linkedinStatusPill(status?: string | null) {
   if (status === "Message sent") return "border-sky-200 bg-sky-50 text-sky-800";
   if (status === "Not relevant") return "border-slate-200 bg-slate-50 text-slate-500";
   return "border-slate-200 bg-white text-slate-500";
+}
+
+function ScrollableCellText({ value }: { value: unknown }) {
+  const text = value === null || value === undefined || value === "" ? "Not set" : String(value);
+
+  return (
+    <div className="max-h-[120px] overflow-y-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6">
+      <span className={text === "Not set" ? "text-slate-400" : "text-slate-800"}>{text}</span>
+    </div>
+  );
 }
 
 export function RecordsTable() {
@@ -329,9 +369,9 @@ export function RecordsTable() {
         {isLoading ? <p className="mt-6 text-slate-600">Loading records...</p> : null}
         {error ? <p className="mt-6 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
 
-        <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="min-w-[2500px] border-collapse text-left text-sm">
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="w-full overflow-x-scroll pb-3 [scrollbar-gutter:stable]">
+            <table className="min-w-[4200px] border-collapse text-left text-sm">
               <thead className="sticky top-0 bg-slate-100 text-xs uppercase tracking-[0.04em] text-slate-600">
                 <tr>
                   <th className="border-b border-r border-slate-200 px-4 py-4 font-semibold">
@@ -341,7 +381,7 @@ export function RecordsTable() {
                     Delete
                   </th>
                   {columns.map((column) => (
-                    <th key={column.key} className="border-b border-r border-slate-200 px-4 py-4 font-semibold">
+                    <th key={column.key} className={`border-b border-r border-slate-200 px-4 py-4 font-semibold ${column.className ?? ""}`}>
                       {column.label}
                     </th>
                   ))}
@@ -369,8 +409,8 @@ export function RecordsTable() {
                         {deletingId === record.id ? "Deleting" : "Delete"}
                       </button>
                     </td>
-                    {columns.map(({ key }) => (
-                      <td key={key} className="max-w-[280px] border-r border-slate-100 px-4 py-4 align-top text-slate-800">
+                    {columns.map(({ key, className }) => (
+                      <td key={key} className={`max-w-[280px] border-r border-slate-100 px-4 py-4 align-top text-slate-800 ${className ?? ""}`}>
                         {key === "created_at" || key === "updated_at" ? (
                           formatDate(record[key])
                         ) : key === "company_relevance" ? (
@@ -386,9 +426,21 @@ export function RecordsTable() {
                             {record.linkedin_message_status || "Not contacted"}
                           </span>
                         ) : key === "linkedin_message_sent_to" || key === "linkedin_reply_notes" ? (
-                          <span className={record[key] ? "text-slate-800" : "text-slate-400"}>{record[key] || "Not set"}</span>
+                          scrollableTextColumns.has(key) ? (
+                            <ScrollableCellText value={record[key]} />
+                          ) : (
+                            <span className={record[key] ? "text-slate-800" : "text-slate-400"}>{record[key] || "Not set"}</span>
+                          )
                         ) : key === "event_day" || key === "time_window" || key === "meeting_time" || key === "country" ? (
                           <span className={record[key] ? "text-slate-800" : "text-slate-400"}>{record[key] || "Not set"}</span>
+                        ) : String(key).startsWith("excel_") ? (
+                          scrollableTextColumns.has(key) ? (
+                            <ScrollableCellText value={record[key]} />
+                          ) : (
+                            <span className={record[key] ? "text-slate-800" : "text-slate-400"}>{record[key] || "Not set"}</span>
+                          )
+                        ) : scrollableTextColumns.has(key) ? (
+                          <ScrollableCellText value={record[key]} />
                         ) : (
                           String(record[key] ?? "")
                         )}

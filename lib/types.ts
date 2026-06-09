@@ -22,6 +22,21 @@ export type ConversationInput = {
   previous_contact?: string | null;
   meeting_outcome?: string | null;
   follow_up_consent?: boolean | null;
+  excel_row_number?: number | string | null;
+  excel_marker?: string | null;
+  excel_company?: string | null;
+  excel_hq?: string | null;
+  excel_ld_contact?: string | null;
+  excel_role_on_ld?: string | null;
+  excel_replied?: string | null;
+  excel_interested?: string | null;
+  excel_ila_contact?: string | null;
+  excel_ila_contact_role?: string | null;
+  excel_meet_at_ila?: string | null;
+  excel_do_what?: string | null;
+  excel_day?: string | null;
+  excel_time?: string | null;
+  excel_meet_after_ila?: string | null;
 };
 
 export type ConversationRecord = ConversationInput & {
